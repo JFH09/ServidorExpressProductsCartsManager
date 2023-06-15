@@ -78,7 +78,7 @@ export default class ProductManager {
         encontrado = true;
         element = productoEditar;
         this.products = this.products.filter((i) => i.id != id);
-        element.id = id;
+        element.id = parseInt(id);
         this.products.push(element);
 
         this.products = this.products.sort((x, y) => x.id - y.id);

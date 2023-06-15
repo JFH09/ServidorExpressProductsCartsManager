@@ -1,7 +1,8 @@
+import { response } from "express";
 import fs from "fs";
 export default class CartManager {
   constructor(path) {
-    this.products = [];
+    this.carts = [];
     this.path = path;
     this.fs = fs;
     this.init = [];
@@ -12,138 +13,124 @@ export default class CartManager {
     //   }
     // });
   }
+  // id: 1/ productsCart : papas / idProducto: 3
+  addProductToCart(idCarrito, product, idProduct) {
+    let response;
+    let encontrado = false;
+    let contenidoArchivo = this.fs.readFileSync(this.path, "utf-8");
+    this.carts = JSON.parse(contenidoArchivo);
+    let productToAdd;
+    // console.log(this.carts);
+    // console.log(this.carts[0].products);
+    // console.log(this.carts[0].products[0]);
+    // console.log(this.carts[0].products[0].quantity);
 
-  addCantidadProduct(id, prodcutsCart, idProduct) {
-    let valido = true;
-    this.product = {
-      title: title,
-      description: description,
-      price: price,
-      thumbnail: thumbnail,
-      code: code,
-      stock: stock,
-    };
-
-    for (let element in this.product) {
-      if (
-        this.product[element] == null ||
-        this.product[element] == "" ||
-        this.product[element] == 0
-      ) {
-        valido = false;
-      }
-    }
-
-    if (valido) {
-      console.log("verificando la lista de productos...");
-      let contenidoArchivo = this.fs.readFileSync(this.path, "utf-8");
-      this.products = JSON.parse(contenidoArchivo);
-
-      const existe = this.products.find(
-        (producto) => producto.code == this.product.code
-      );
-      if (existe) {
-        return `el producto con codigo - ${this.product.code} -  ya existe!!!!`;
-      } else {
-        console.log("Agregando Producto...");
-        let id = 0;
-        let tamanoLista = this.products.length;
-        id = tamanoLista + 1;
-        this.product.id = id;
-        this.products.push(this.product);
-        let data = JSON.stringify(this.products);
-        console.log(data);
+    console.log("Agregando Product al carrito con id -> ", idCarrito);
+    this.carts.forEach((element) => {
+      if (element.id == idCarrito) {
+        encontrado = true;
+        let productosEnCarrito = [];
+        for (const key in element.products) {
+          // console.log("elemento !!!!!", element.products[key]);
+          console.log("Tam arreglo", element.products.length);
+          console.log("Tam arreglo", element.products[key]);
+          if (element.products[key] != null) {
+            if (
+              product == element.products[key].product &&
+              idProduct == element.products[key].productId
+            ) {
+              console.log(`Ya existe un producto ${product} en el carrito !!!`);
+              productToAdd = {
+                product: product,
+                quantity: element.products[key].quantity + 1,
+                productId: idProduct,
+              };
+            } else {
+              productToAdd = {
+                product: product,
+                quantity: 1,
+                productId: idProduct,
+              };
+              console.log(productToAdd);
+              productosEnCarrito.push(element.products[key]);
+            }
+          } else {
+            console.log("El carrito esta vacio...");
+            productToAdd = {
+              product: product,
+              quantity: 1,
+              productId: idProduct,
+            };
+            //productosEnCarrito.push(element.products[key]);
+          }
+        }
+        productosEnCarrito.push(productToAdd);
+        console.log(productosEnCarrito);
+        this.carts = this.carts.filter((i) => i.id != idCarrito);
+        let carritoActual = { id: idCarrito, products: productosEnCarrito };
+        this.carts.push(carritoActual);
+        this.carts = this.carts.sort((x, y) => x.id - y.id);
+        let data = JSON.stringify(this.carts);
+        // console.log(data);
         this.fs.writeFileSync(this.path, data, (err) => {
           if (err) console.log("ERROR", err);
           else {
             console.log("Escribio...");
           }
         });
-        return `Producto  ${this.product.title} agregado satisfactoriamente `;
-      }
-    } else {
-      return "Ingrese valores validos, no null, vacios o valores en 0";
-    }
-  }
-
-  updateProductByIdAndObject(id, productoEditar) {
-    let response;
-    let encontrado = false;
-    let contenidoArchivo = this.fs.readFileSync(this.path, "utf-8");
-    this.products = JSON.parse(contenidoArchivo);
-
-    console.log("Entro a edit Product el id -> ", id);
-    this.products.forEach((element) => {
-      if (element.id == id) {
-        encontrado = true;
-        element = productoEditar;
-        this.products = this.products.filter((i) => i.id != id);
-        element.id = id;
-        this.products.push(element);
-
-        this.products = this.products.sort((x, y) => x.id - y.id);
-        let data = JSON.stringify(this.products);
-        //console.log(data);
-        this.fs.writeFileSync(this.path, data, (err) => {
-          if (err) {
-            response = { mensaje: "ERROR Escribiendo en archivo", error: err };
-            return;
-          } else {
-            console.log("Escribio...");
-            response = {
-              mensaje: "Producto actualizado satisfactoriamente",
-              productoActualizado: element,
-            };
-          }
-        });
+        response = `Producto  ${product} agregado satisfactoriamente `;
       }
     });
 
     if (encontrado) {
-      console.log("fin update.");
-      console.log(response);
-      response = `Producto con id - ${id} - actualizado satisfactoriamente`;
+      response = `Producto  ${product} agregado satisfactoriamente `;
     } else {
-      response = "No se encontro el id";
+      response = `No se encontro el carrito con el id ${idCarrito}`;
     }
     return response;
   }
 
-  deleteProductById(id) {
+  addCart() {
     let contenidoArchivo = this.fs.readFileSync(this.path, "utf-8");
-    this.products = JSON.parse(contenidoArchivo);
-    this.products = this.products.filter((prod) => prod.id != id);
-    let data = JSON.stringify(this.products);
+    this.carts = JSON.parse(contenidoArchivo);
+
+    let cantidadCarritos = this.carts.length;
+
+    this.carts.push({ id: cantidadCarritos + 1, products: [null] });
+
+    this.carts = this.carts.sort((x, y) => x.id - y.id);
+    let data = JSON.stringify(this.carts);
+    // console.log(data);
     this.fs.writeFileSync(this.path, data, (err) => {
-      if (err) return console.log("ERROR", err);
+      if (err) return `"ERROR" ${err}`;
       else {
-        console.log("Escribio...");
+        response = `Carro creado con id # ${cantidadCarritos + 1}`;
       }
     });
-    return this.products;
+    return `Carro creado con id # ${cantidadCarritos + 1}`;
   }
-  getProducts() {
+
+  getCarts() {
     let contenido = this.fs.readFileSync(this.path, "utf-8");
     return JSON.parse(contenido);
   }
 
-  getProductById(id) {
+  getCartById(id) {
     let encontrado = false;
-    let producto;
+    let carrito;
     let contenidoArchivo = this.fs.readFileSync(this.path, "utf-8");
-    this.products = JSON.parse(contenidoArchivo);
-    //console.log("consultando archivo products -> ", this.products);
-    //console.log("cnt", contenidoArchivo);
+    this.carts = JSON.parse(contenidoArchivo);
+
     console.log("buscar id = ", id);
-    this.products.forEach((e) => {
+    this.carts.forEach((e) => {
       if (e.id == id) {
-        producto = e;
+        carrito = e.products;
         encontrado = true;
-        return producto;
+        return carrito;
       }
     });
     if (encontrado) {
-      return producto;
+      return carrito;
     } else {
       return "Not Found";
     }
