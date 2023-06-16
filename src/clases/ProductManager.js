@@ -52,7 +52,7 @@ export default class ProductManager {
         this.product.id = id;
         this.products.push(this.product);
         let data = JSON.stringify(this.products);
-        console.log(data);
+        //console.log(data);
         this.fs.writeFileSync(this.path, data, (err) => {
           if (err) console.log("ERROR", err);
           else {
@@ -101,7 +101,7 @@ export default class ProductManager {
 
     if (encontrado) {
       console.log("fin update.");
-      console.log(response);
+      // console.log(response);
       response = `Producto con id - ${id} - actualizado satisfactoriamente`;
     } else {
       response = "No se encontro el id";
@@ -110,9 +110,16 @@ export default class ProductManager {
   }
 
   deleteProductById(id) {
+    //console.log("eliminar por id");
     let contenidoArchivo = this.fs.readFileSync(this.path, "utf-8");
     this.products = JSON.parse(contenidoArchivo);
-    this.products = this.products.filter((prod) => prod.id != id);
+    let productToDelete = this.products;
+    productToDelete = productToDelete.filter((prod) => prod.id == id);
+    this.products[this.products.indexOf(productToDelete[0])] = {
+      id: productToDelete[0].id,
+    };
+
+    this.products = this.products.sort((x, y) => x.id - y.id);
     let data = JSON.stringify(this.products);
     this.fs.writeFileSync(this.path, data, (err) => {
       if (err) return console.log("ERROR", err);

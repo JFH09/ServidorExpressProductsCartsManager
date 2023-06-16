@@ -8,8 +8,8 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", productsRoutes);
-app.use("/api", cartsRoutes);
+app.use("/api/products", productsRoutes);
+app.use("/api/carts", cartsRoutes);
 
 app.get("/", (req, resp) => {
   resp.send(

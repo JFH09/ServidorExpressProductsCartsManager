@@ -5,7 +5,7 @@ const router = Router();
 const rutaDatos = "./src/clases/files/productos.json";
 const productManager = new ProductManager(rutaDatos);
 
-router.get("/products", async (req, resp) => {
+router.get("/", async (req, resp) => {
   const limite = req.query.limit;
   if (limite != null) {
     const productos = await productManager.getProducts();
@@ -23,7 +23,7 @@ router.get("/products", async (req, resp) => {
   }
 });
 
-router.get("/products/:idProduto", async (req, resp) => {
+router.get("/:idProduto", async (req, resp) => {
   let idProduto = req.params.idProduto;
 
   let producto = await productManager.getProductById(idProduto);
@@ -31,7 +31,7 @@ router.get("/products/:idProduto", async (req, resp) => {
   resp.send(producto);
 });
 
-router.post("/products", async (req, resp) => {
+router.post("/", async (req, resp) => {
   const { title, description, price, thumbnail, code, stock } = req.body;
   console.log(req.body);
   let product = await productManager.addProduct(
@@ -47,7 +47,7 @@ router.post("/products", async (req, resp) => {
   resp.status(201).json(product);
 });
 
-router.put("/products/:id", async (req, resp) => {
+router.put("/:id", async (req, resp) => {
   const { id } = req.params;
   const productId = id;
   console.log(productId);
@@ -60,7 +60,7 @@ router.put("/products/:id", async (req, resp) => {
   resp.status(201).json(product);
 });
 
-router.delete("/products/:id", (req, resp) => {
+router.delete("/:id", (req, resp) => {
   const { id } = req.params;
 
   const product = productManager.deleteProductById(id);

@@ -5,20 +5,20 @@ const router = Router();
 const rutaDatos = "./src/clases/files/carts.json";
 const cartManager = new CartManager(rutaDatos);
 
-router.get("/carts", (req, resp) => {
+router.get("/", (req, resp) => {
   const productos = cartManager.getCarts();
   resp.status(201).json(productos);
 });
 
-router.get("/carts/:idCarrito", async (req, resp) => {
+router.get("/:idCarrito", async (req, resp) => {
   let idCarrito = req.params.idCarrito;
 
   let carrito = await cartManager.getCartById(idCarrito);
 
   resp.status(201).json(carrito);
 });
-router.post("/carts/:id/:product/:idProduct", async (req, resp) => {
-  const { id, product, idProduct } = req.body;
+router.post("/:id/:product/:idProduct", async (req, resp) => {
+  const { id, product, idProduct } = req.params;
   console.log(req.body);
   //const product = cartManager.addProduct(id, productCart, idProduct);
   const carts = await cartManager.addProductToCart(id, product, idProduct);
@@ -26,7 +26,7 @@ router.post("/carts/:id/:product/:idProduct", async (req, resp) => {
   resp.status(201).json(carts);
 });
 
-router.post("/carts", async (req, resp) => {
+router.post("/", async (req, resp) => {
   const carts = await cartManager.addCart();
 
   resp.status(201).json(carts);
